@@ -1,0 +1,640 @@
+@startuml CoffeeHub
+' Layout e configurações visuais
+left to right direction
+skinparam nodesep 60
+skinparam ranksep 100
+skinparam packagePadding 10
+skinparam packageMargin 15
+skinparam padding 2
+skinparam roundCorner 10
+skinparam linetype ortho
+skinparam shadowing false
+skinparam MaxEntityWidth 200
+skinparam MinEntityWidth 100
+skinparam entityAttributeIconSize 0
+skinparam packageStyle rectangle
+
+' Melhorias visuais 
+skinparam ArrowColor #666666
+skinparam ArrowThickness 1.2
+skinparam BackgroundColor white
+skinparam TitleFontSize 18
+skinparam TitleFontStyle bold
+
+' Cores e estilos para pacotes e entidades
+skinparam package {
+  BackgroundColor transparent
+  BorderColor gray
+  BorderThickness 1.5
+  FontStyle bold
+  FontSize 14
+}
+
+skinparam entity {
+  BackgroundColor white
+  BorderColor #333333
+  BorderThickness 1
+  FontSize 12
+  AttributeFontSize 11
+  AttributeFontColor #333333
+  FontStyle plain
+  StereotypeFontSize 10
+}
+
+' Título do diagrama
+title Sistema Integrado de Rastreabilidade e Gestão para Cafeicultura
+
+' ==============================
+' VISÃO GERAL DO SISTEMA
+' ==============================
+package "Visão Geral do Sistema" {
+  note as N1
+    <b>Sistema de Rastreabilidade para Cafeicultura</b>
+    
+    Este diagrama está organizado em módulos funcionais:
+    
+    1. <b>Cadastro e Estrutura:</b> Produtores, propriedades, talhões
+    2. <b>Ciclo e Monitoramento:</b> Fenologia, clima, manejo
+    3. <b>Recursos:</b> Equipamentos, equipes de trabalho
+    4. <b>Insumos e Aplicações:</b> Fertilizantes, agroquímicos
+    5. <b>Produção e Processamento:</b> Colheita, lotes, beneficiamento
+    6. <b>Qualidade e Comercialização:</b> Classificação, venda
+    7. <b>Controle e Certificações:</b> Certificados, rastreabilidade
+    8. <b>Financeiro e RH:</b> Operações, funcionários, KPIs
+    
+    <b>Legenda de Cardinalidade:</b>
+    ||--|| = um para um
+    ||--o{ = um para muitos
+    }o--|| = muitos para um
+    }o--o{ = muitos para muitos
+    <|-- = herança/especialização
+  end note
+}
+
+' ==============================
+' Cadastro e Estrutura - MÓDULO 1
+' ==============================
+package "1. Cadastro e Estrutura" #EEFFE0 {
+  together {
+    entity "Produtor" as Produtor #palegreen {
+      * id : INT <<PK>>
+      --
+      nome, cpf, telefone
+      endereço estruturado
+      status, data_cadastro
+    }
+    
+    entity "Conjuge" as Conjuge #palegreen {
+      * id : INT <<PK>>
+      --
+      nome, cpf, telefone
+      * FK_produtor_id : INT <<FK>>
+    }
+    
+    entity "Propriedade" as Propriedade #palegreen {
+      * id : INT <<PK>>
+      --
+      nome, status, localização
+      área_total, altitude_média
+      dados cadastrais (IE, CCIR)
+      * FK_produtor_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "Talhao" as Talhao #palegreen {
+      * id : INT <<PK>>
+      --
+      identificador, status, área
+      dados geográficos
+      dados de plantio
+      * FK_propriedade_id : INT <<FK>>
+      FK_variedade_id : INT <<FK>>
+    }
+    
+    entity "HistoricoTalhao" as HistoricoTalhao #palegreen {
+      * id : INT <<PK>>
+      --
+      data_alteracao, tipo
+      dados anteriores
+      * FK_talhao_id : INT <<FK>>
+    }
+    
+    entity "VariedadeCafe" as VariedadeCafe #palegreen {
+      * id : INT <<PK>>
+      --
+      nome, espécie
+      características
+      potencial produtivo
+    }
+  }
+  
+  together {
+    entity "AreaPreservacao" as AreaPreservacao #palegreen {
+      * id : INT <<PK>>
+      --
+      tipo, descrição, tamanho
+      status, recuperação
+      * FK_propriedade_id : INT <<FK>>
+      FK_car_id : INT <<FK>>
+    }
+    
+    entity "CAR" as CAR #palegreen {
+      * id : INT <<PK>>
+      --
+      número, datas
+      áreas de preservação
+      * FK_propriedade_id : INT <<FK>>
+    }
+    
+    entity "ProducaoTalhao" as ProducaoTalhao #palegreen {
+      * id : INT <<PK>>
+      --
+      ano_safra, produção
+      produtividade
+      * FK_talhao_id : INT <<FK>>
+    }
+  }
+}
+
+' ==============================
+' Ciclo e Monitoramento - MÓDULO 2
+' ==============================
+package "2. Ciclo e Monitoramento" #E0F8FF {
+  together {
+    entity "CicloFenologico" as CicloFenologico #aliceblue {
+      * id : INT <<PK>>
+      --
+      datas, ano_safra
+      estágio, observações
+      * FK_talhao_id : INT <<FK>>
+    }
+    
+    entity "Monitoramento" as Monitoramento #aliceblue {
+      * id : INT <<PK>>
+      --
+      data, tipo, descrição
+      código_rastreio
+      * FK_talhao_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "Clima" as Clima #aliceblue {
+      * id : INT <<PK>>
+      --
+      data, temperatura
+      umidade, precipitação
+      dados de vento
+      FK_talhao_id : INT <<FK>>
+      FK_propriedade_id : INT <<FK>>
+    }
+    
+    entity "Irrigacao" as Irrigacao #aliceblue {
+      * id : INT <<PK>>
+      --
+      data, volume, modo
+      código_rastreio
+      * FK_talhao_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_equipamento_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+    }
+    
+    entity "Manejo" as Manejo #aliceblue {
+      * id : INT <<PK>>
+      --
+      data, tipo, descrição
+      código_rastreio
+      * FK_talhao_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_equipamento_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+    }
+  }
+}
+
+' ==============================
+' Recursos - MÓDULO 3
+' ==============================
+package "3. Recursos" #FFE0E0 {
+  entity "Equipamento" as Equipamento #mistyrose {
+    * id : INT <<PK>>
+    --
+    tipo, identificação
+    marca, modelo, ano
+    status, dados técnicos
+  }
+  
+  entity "EquipeMaoObra" as EquipeMaoObra #mistyrose {
+    * id : INT <<PK>>
+    --
+    nome, descrição
+    data_formação
+    * FK_lider_id : INT <<FK>>
+  }
+  
+  entity "MembroEquipe" as MembroEquipe #mistyrose {
+    * id : INT <<PK>>
+    --
+    datas, função
+    * FK_equipe_id : INT <<FK>>
+    * FK_funcionario_id : INT <<FK>>
+  }
+}
+
+' ==============================
+' Insumos e Aplicações - MÓDULO 4
+' ==============================
+package "4. Insumos e Aplicações" #FFF0F0 {
+  together {
+    entity "Insumo" as Insumo #mistyrose {
+      * id : INT <<PK>>
+      --
+      nome, categoria
+      unidade, código_rastreio
+      dados do fabricante
+    }
+    
+    entity "EstoqueInsumo" as EstoqueInsumo #mistyrose {
+      * id : INT <<PK>>
+      --
+      data, quantidades
+      saldo, lote, NF
+      * FK_insumo_id : INT <<FK>>
+      FK_propriedade_id : INT <<FK>>
+    }
+    
+    entity "Aplicacao" as Aplicacao #mistyrose {
+      * id : INT <<PK>>
+      --
+      data, quantidade
+      código_rastreio
+      * FK_insumo_id : INT <<FK>>
+      FK_talhao_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_equipamento_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+      FK_equipe_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "Fertilizante" as Fertiliz << (S,#FFAAAA) >> #mistyrose {
+      * insumo_id : INT <<PK,FK>>
+      --
+      tipo, formulação
+      dosagens, composição
+    }
+    
+    entity "Agroquimico" as Agroquim << (S,#FFAAAA) >> #mistyrose {
+      * insumo_id : INT <<PK,FK>>
+      --
+      tipo, descrição
+      dosagens, carência
+      princípio ativo
+      registro MAPA
+    }
+  }
+}
+
+' ==============================
+' Produção e Processamento - MÓDULO 5
+' ==============================
+package "5. Produção e Processamento" #F0F0FF {
+  together {
+    entity "Colheita" as Colheita #lavender {
+      * id : INT <<PK>>
+      --
+      data, quantidade
+      método, maturação
+      código_rastreio
+      * FK_talhao_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_equipamento_id : INT <<FK>>
+      FK_equipe_id : INT <<FK>>
+    }
+    
+    entity "Lote" as Lote #lavender {
+      * id : INT <<PK>>
+      --
+      código, status
+      data_criação
+      * FK_colheita_id : INT <<FK>>
+    }
+    
+    entity "RecebimentoMoega" as RecebimentoMoega #lavender {
+      * id : INT <<PK>>
+      --
+      data, quantidade
+      código_rastreio
+      * FK_lote_id : INT <<FK>>
+      FK_equipamento_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "ProcessamentoCafe" as ProcCafe #lavender {
+      * id : INT <<PK>>
+      --
+      datas, tipo, status
+      código_rastreio
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      FK_responsavel_id : INT <<FK>>
+    }
+    
+    entity "EtapaPreparoCafe" as EtapaPreparoCafe #lavender {
+      * id : INT <<PK>>
+      --
+      tipo, datas
+      percentuais
+      * FK_processamento_id : INT <<FK>>
+    }
+    
+    entity "EtapaSecagem" as EtapaSecagem #lavender {
+      * id : INT <<PK>>
+      --
+      método, datas
+      umidade, temperatura
+      * FK_processamento_id : INT <<FK>>
+    }
+    
+    entity "EtapaBeneficiamento" as EtapaBeneficiamento #lavender {
+      * id : INT <<PK>>
+      --
+      datas, umidade
+      sacas, rendimento
+      * FK_processamento_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "Armazenamento" as Armazen #lavender {
+      * id : INT <<PK>>
+      --
+      datas, local
+      condições ambientais
+      código_rastreio
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+    }
+    
+    entity "LoteComposicao" as LoteComposicao #lavender {
+      * id : INT <<PK>>
+      --
+      data, tipo_operação
+      quantidade, percentual
+      * FK_lote_origem_id : INT <<FK>>
+      * FK_lote_destino_id : INT <<FK>>
+    }
+  }
+}
+
+' ==============================
+' Qualidade e Comercialização - MÓDULO 6
+' ==============================
+package "6. Qualidade e Comercialização" #FFF8E0 {
+  together {
+    entity "ClassificacaoCafe" as ClassifCafe #lemonchiffon {
+      * id : INT <<PK>>
+      --
+      data, tipo, peneira
+      características físicas
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      * FK_classificador_id : INT <<FK>>
+    }
+    
+    entity "PerfilSensorial" as PerfilSens #lemonchiffon {
+      * id : INT <<PK>>
+      --
+      data, metodologia
+      atributos sensoriais
+      pontuação_final
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+      * FK_degustador_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "MovimentacaoLote" as MovLote #lemonchiffon {
+      * id : INT <<PK>>
+      --
+      data, origem, destino
+      transportador, documento
+      código_rastreio
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+    }
+    
+    entity "Comercializacao" as Comercial #lemonchiffon {
+      * id : INT <<PK>>
+      --
+      data, quantidade
+      valor, comprador
+      nota_fiscal, código_rastreio
+      * FK_lote_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+    }
+  }
+}
+
+' ==============================
+' Controle e Certificações - MÓDULO 7
+' ==============================
+package "7. Controle e Certificações" #F0E0FF {
+  together {
+    entity "Certificacao" as Cert #lavenderblush {
+      * id : INT <<PK>>
+      --
+      datas, tipo, entidade
+      código, requisitos
+      * FK_produtor_id : INT <<FK>>
+      FK_propriedade_id : INT <<FK>>
+    }
+    
+    entity "RastreabilidadeQR" as RastreioQR #lavenderblush {
+      * id : INT <<PK>>
+      --
+      código_qr, url
+      data, tipo_entidade
+      id_entidade, nível_detalhe
+    }
+    
+    entity "EventoRastreabilidade" as EventoRastreio #lavenderblush {
+      * id : INT <<PK>>
+      --
+      data, tipo, código_rastreio
+      entidade_origem, id_origem
+      entidade_destino, id_destino
+    }
+  }
+  
+  entity "EntregaEmbalagens" as EntEmb #lavenderblush {
+    * id : INT <<PK>>
+    --
+    data, tipo, quantidade
+    comprovante
+    * FK_produtor_id : INT <<FK>>
+  }
+}
+
+' ==============================
+' Financeiro e RH - MÓDULO 8
+' ==============================
+package "8. Financeiro e RH" #E0E0E0 {
+  together {
+    entity "Operacao" as Operacao #gainsboro {
+      * id : INT <<PK>>
+      --
+      data, tipo, descrição
+      valor, categoria
+      dados financeiros
+    }
+    
+    entity "Funcionario" as Func #gainsboro {
+      * id : INT <<PK>>
+      --
+      nome, contato, cargo
+      dados pessoais
+      dados contratuais
+      * FK_produtor_id : INT <<FK>>
+    }
+    
+    entity "Capacitacao" as Capacitacao #gainsboro {
+      * id : INT <<PK>>
+      --
+      tipo, nome, datas
+      carga_horária, instrutor
+      * FK_produtor_id : INT <<FK>>
+      FK_funcionario_id : INT <<FK>>
+      FK_operacao_id : INT <<FK>>
+    }
+  }
+  
+  together {
+    entity "IndicadorDesempenho" as KPI #gainsboro {
+      * id : INT <<PK>>
+      --
+      nome, categoria
+      unidade, descrição
+      fórmula, meta
+    }
+    
+    entity "MedicaoIndicador" as MedicaoKPI #gainsboro {
+      * id : INT <<PK>>
+      --
+      data, período
+      valor, observações
+      * FK_indicador_id : INT <<FK>>
+      FK_propriedade_id : INT <<FK>>
+      FK_talhao_id : INT <<FK>>
+    }
+  }
+}
+
+' ==============================
+' RELACIONAMENTOS PRINCIPAIS
+' ==============================
+
+' Nota sobre relacionamentos
+note as RelNote
+  <b>Nota sobre Relacionamentos:</b>
+  
+  Para melhorar a visualização, apenas os relacionamentos
+  principais são mostrados no diagrama. Os relacionamentos
+  completos estão documentados na especificação técnica.
+  
+  Cada módulo mantém relacionamentos internos coesos e
+  se conecta com outros módulos através de chaves estrangeiras.
+end note
+
+' Relacionamentos do Módulo 1 - Cadastro e Estrutura
+Produtor ||--o{ Propriedade : possui
+Produtor ||--o| Conjuge : tem
+Propriedade ||--o{ Talhao : subdivide
+Propriedade ||--o{ AreaPreservacao : possui
+Propriedade ||--o| CAR : registra
+Talhao ||--o{ HistoricoTalhao : registra
+Talhao }o--|| VariedadeCafe : plantado com
+Talhao ||--o{ ProducaoTalhao : produz
+CAR ||--o{ AreaPreservacao : relaciona
+
+' Relacionamentos do Módulo 2 - Ciclo e Monitoramento
+Talhao ||--o{ CicloFenologico : registra
+Talhao ||--o{ Monitoramento : monitora
+Talhao ||--o{ Irrigacao : irriga
+Talhao ||--o{ Manejo : maneja
+Talhao |o--o{ Clima : registra
+
+' Relacionamentos do Módulo 3 - Recursos
+Func ||--o{ EquipeMaoObra : lidera
+EquipeMaoObra ||--o{ MembroEquipe : composta
+Func ||--o{ MembroEquipe : participa
+
+' Relacionamentos do Módulo 4 - Insumos e Aplicações
+Insumo <|-- Fertiliz
+Insumo <|-- Agroquim
+Insumo ||--o{ EstoqueInsumo : estocado
+Insumo ||--o{ Aplicacao : aplicado
+Talhao |o--o{ Aplicacao : recebe
+
+' Relacionamentos do Módulo 5 - Produção e Processamento
+Talhao ||--o{ Colheita : produz
+Colheita ||--o{ Lote : gera
+Lote ||--o{ RecebimentoMoega : recebido
+Lote ||--o{ ProcCafe : processado
+ProcCafe ||--o{ EtapaPreparoCafe : prepara
+ProcCafe ||--o{ EtapaSecagem : seca
+ProcCafe ||--o{ EtapaBeneficiamento : beneficia
+Lote |o--o{ Armazen : armazenado
+Lote ||--o{ LoteComposicao : origem
+Lote ||--o{ LoteComposicao : destino
+
+' Relacionamentos do Módulo 6 - Qualidade e Comercialização
+Lote ||--o{ ClassifCafe : classificado
+Lote ||--o{ PerfilSens : avaliado
+Lote ||--o{ MovLote : movimentado
+Lote ||--o{ Comercial : vendido
+
+' Relacionamentos do Módulo 7 - Controle e Certificações
+Produtor ||--o{ Cert : certificado
+Propriedade |o--o{ Cert : certificada
+Produtor ||--o{ EntEmb : devolve
+Lote |o--o{ RastreioQR : rastreado
+Talhao |o--o{ RastreioQR : rastreado
+Propriedade |o--o{ RastreioQR : rastreada
+
+' Relacionamentos do Módulo 8 - Financeiro e RH
+Produtor ||--o{ Func : emprega
+Produtor ||--o{ Capacitacao : participa
+Func |o--o{ Capacitacao : recebe
+KPI ||--o{ MedicaoKPI : medido
+Propriedade |o--o{ MedicaoKPI : avaliada
+Talhao |o--o{ MedicaoKPI : avaliado
+
+' Relacionamentos entre módulos - Principais apenas
+Func |o--o{ Monitoramento : executa
+Func |o--o{ ClassifCafe : classifica
+Func |o--o{ PerfilSens : degusta
+Func |o--o{ ProcCafe : responsável
+Equipamento |o--o{ Colheita : utilizado
+EquipeMaoObra |o--o{ Colheita : realiza
+Operacao ||--o{ Colheita : financia
+Operacao ||--o{ ProcCafe : financia
+Operacao ||--o{ Comercial : registra
+
+' Nota sobre rastreabilidade
+note bottom of EventoRastreio
+  <b>Sistema de Rastreabilidade:</b>
+  - Cada evento crítico gera registro de rastreabilidade
+  - Códigos de rastreio padronizados em todas as etapas
+  - Suporte para rastreabilidade multinível
+  - Mecanismo para rastrear misturas e divisões de lotes
+end note
+@enduml

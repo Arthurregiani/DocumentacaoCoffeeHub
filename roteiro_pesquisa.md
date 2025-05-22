@@ -4,9 +4,9 @@
 
 **Objetivo da Pesquisa:** Levantar informações sobre práticas de gestão, rastreabilidade e uso de tecnologias entre pequenos produtores de café de montanha no Espírito Santo, visando identificar necessidades e desafios para o desenvolvimento do sistema CoffeeHub.
 
-**Público-alvo:** 11 pequenos produtores de café de montanha no Espírito Santo, com propriedades de até 20 hectares.
+**Público-alvo:** Produtores de café de montanha no Espírito Santo, com propriedades de até 20 hectares.
 
-**Metodologia:** Entrevista semiestruturada presencial, complementada por questionário e observação in loco.
+**Metodologia:** Formulário e observações.
 
 ## Roteiro de Entrevista
 
@@ -199,21 +199,3 @@
 
 ---
 
-## Observação in loco (a ser preenchido pelo pesquisador)
-
-1. Condições gerais da propriedade:
-   - Infraestrutura: _____________________
-   - Organização: _____________________
-   - Tecnificação: _____________________
-
-2. Práticas de registro observadas:
-   - _____________________
-   - _____________________
-
-3. Tecnologias disponíveis e em uso:
-   - _____________________
-   - _____________________
-
-4. Observações adicionais:
-   - _____________________
-   - _____________________
